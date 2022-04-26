@@ -12,9 +12,9 @@ def min_max_scale(
     df: pd.DataFrame,
     old_min: int = None,
     old_max: int = None,
-    column_name: int | str | list[int | str] | tuple[int | str] = None,
     new_min: int = 0,
     new_max: int = 1,
+    column_name: int | str | list[int | str] | tuple[int | str] = None,
 ) -> pd.DataFrame:
     """
     Scales data to between a minimum and maximum value.
