@@ -10,12 +10,9 @@ from janitor.utils import deprecated_alias
 @deprecated_alias(col_name="column_name")
 def min_max_scale(
     df: pd.DataFrame,
-    old_min: int = None,
-    old_max: int = None,
-    new_min: int = 0,
-    new_max: int = 1,
-    entire_data: bool = False,
+    feature_range: tuple[int | float, int | float] = (0, 1),
     column_name: int | str | list[int | str] | tuple[int | str] = None,
+    entire_data: bool = False,
 ) -> pd.DataFrame:
     """
     Scales data to between a minimum and maximum value.
@@ -25,14 +22,14 @@ def min_max_scale(
     these values, instead.
 
     One can optionally set a new target minimum and maximum value using the
-    `new_min` and `new_max` keyword arguments. This will result in the
-    transformed data being bounded between `new_min` and `new_max`.
+    `feature_range[0]` and `feature_range[1]` keyword arguments.
+    This will result in the transformed data being bounded between
+    `feature_range[0]` and `feature_range[1]`.
 
     If `column_name` is specified, then only that column(s) of data is scaled.
-    Otherwise, the entire dataframe is scaled.
-    If `entire_data` is `True`, the entire dataframe will be regnozied as
-
-    the one to scale. Otherwise, each column of data will be scaled sperately.
+    Otherwise, the entire dataframe is scaled. If `entire_data` is `True`,
+    the entire dataframe will be regnozied as the one to scale. Otherwise,
+    each column of data will be scaled sperately.
 
     Method chaining syntax:
 
@@ -46,9 +43,8 @@ def min_max_scale(
         df = (
             pd.DataFrame(...)
             .min_max_scale(
+                feature_range=(2, 10),
                 column_name="a",
-                new_min=2,
-                new_max=10
             )
         )
     ```
@@ -59,12 +55,7 @@ def min_max_scale(
     ```python
         df = (
             pd.DataFrame(...)
-            .min_max_scale(
-                old_min=0,
-                old_max=14,
-                new_min=0,
-                new_max=1,
-            )
+            .min_max_scale()
         )
     ```
 
@@ -75,63 +66,44 @@ def min_max_scale(
     gets scaled to approx. 0.69 instead.
 
     :param df: A pandas DataFrame.
-    :param old_min: (optional) Overrides for the current minimum
-        value of the data to be transformed.
-    :param old_max: (optional) Overrides for the current maximum
-        value of the data to be transformed.
-    :param new_min: (optional) The minimum value of the data after
-        it has been scaled.
-    :param new_max: (optional) The maximum value of the data after
-        it has been scaled.
-    :param entire_data: (bool) Scale the entire data if Ture.
+    :param feature_range: (optional) Desired range of transformed data.
     :param column_name: (optional) The column on which to perform scaling.
+    :param entire_data: (bool) Scale the entire data if Ture.
     :returns: A pandas DataFrame with scaled data.
     :raises ValueError: if `old_max` is not greater than `old_min``.
-    :raises ValueError: if `new_max` is not greater than `new_min``.
+    :raises ValueError: if `feature_range[1]` is not greater than `feature_range[0]``.
     """
 
-    if (
-        (old_min is not None)
-        and (old_max is not None)
-        and (old_max <= old_min)
-    ):
-        raise ValueError("`old_max` should be greater than `old_min`")
+    if feature_range[1] <= feature_range[0]:
+        raise ValueError(
+            "`feature_range[1]` should be greater than `feature_range[0]`"
+        )
 
-    if new_max <= new_min:
-        raise ValueError("`new_max` should be greater than `new_min`")
+    new_range = feature_range[1] - feature_range[0]
 
-    new_range = new_max - new_min
-
-        if entire_data:
     if column_name:
-            if old_min is None:
-                old_min = df.min().min()
-            if old_max is None:
-                old_max = df.max().max()
+        if entire_data:
+            old_min = df[column_name].min().min()
+            old_max = df[column_name].max().max()
         else:
-            if old_min is None:
-                old_min = df[column_name].min()
-            if old_max is None:
-                old_max = df[column_name].max()
+            old_min = df[column_name].min()
+            old_max = df[column_name].max()
 
         old_range = old_max - old_min
+
         df[column_name] = (
             df[column_name] - old_min
         ) * new_range / old_range + new_min
 
-        if entire_data:
     else:
-            if old_min is None:
-                old_min = df.min().min()
-            if old_max is None:
-                old_max = df.max().max()
+        if entire_data:
+            old_min = df.min().min()
+            old_max = df.max().max()
         else:
-            if old_min is None:
-                old_min = df.min()
-            if old_max is None:
-                old_max = df.max()
+            old_min = df.min()
+            old_max = df.max()
 
         old_range = old_max - old_min
-        df = (df - old_min) * new_range / old_range + new_min
+        df = (df - old_min) * new_range / old_range + feature_range[0]
 
     return df
