@@ -79,7 +79,8 @@ def min_max_scale(
             "`feature_range[1]` should be greater than `feature_range[0]`"
         )
 
-    new_range = feature_range[1] - feature_range[0]
+    new_min, new_max = feature_range[0], feature_range[1]
+    new_range = new_max - new_min
 
     if column_name:
         if entire_data:
@@ -90,7 +91,6 @@ def min_max_scale(
             old_max = df[column_name].max()
 
         old_range = old_max - old_min
-
         df[column_name] = (
             df[column_name] - old_min
         ) * new_range / old_range + new_min
@@ -104,6 +104,6 @@ def min_max_scale(
             old_max = df.max()
 
         old_range = old_max - old_min
-        df = (df - old_min) * new_range / old_range + feature_range[0]
+        df = (df - old_min) * new_range / old_range + new_min
 
     return df
