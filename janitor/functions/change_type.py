@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Hashable
 
 import pandas as pd
@@ -9,7 +11,7 @@ from janitor.utils import deprecated_alias
 @deprecated_alias(column="column_name")
 def change_type(
     df: pd.DataFrame,
-    column_name: Hashable,
+    column_name: Hashable | list[Hashable],
     dtype: type,
     ignore_exception: bool = False,
 ) -> pd.DataFrame:
