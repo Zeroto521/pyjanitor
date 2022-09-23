@@ -10,7 +10,8 @@ from janitor.utils import deprecated_alias
 def to_datetime(
     df: pd.DataFrame, column_name: Hashable, **kwargs
 ) -> pd.DataFrame:
-    """Convert column to a datetime type, in-place.
+    """
+    Convert column to a datetime type.
 
     Intended to be the method-chaining equivalent of:
 
@@ -43,6 +44,8 @@ def to_datetime(
     :param kwargs: Provide any kwargs that `pd.to_datetime` can take.
     :returns: A pandas DataFrame with updated datetime data.
     """  # noqa: E501
+
+    df = df.copy()  # don't mutate original dataframe
     df[column_name] = pd.to_datetime(df[column_name], **kwargs)
 
     return df
