@@ -1,4 +1,7 @@
 """Utility functions for all of the functions submodule."""
+
+from __future__ import annotations
+
 import fnmatch
 import warnings
 from collections.abc import Callable as dispatch_callable
