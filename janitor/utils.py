@@ -3,6 +3,8 @@
 Lazy loading used here to speed up imports.
 """
 
+from __future__ import annotations
+
 import os
 import sys
 import socket
